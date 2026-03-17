@@ -16,8 +16,6 @@ else
   BASE_PREFIX="/${REPO_NAME}/"
 fi
 
-echo "Generating documentation for version $VERSION with prefix $BASE_PREFIX..."
-
 go work init . ./core ./tbadk ./tbgenkit
 
 go install golang.org/x/pkgsite/cmd/pkgsite@latest
@@ -37,7 +35,6 @@ wget -nv --recursive --page-requisites --convert-links \
 kill $PKGSITE_PID
 rm go.work go.work.sum
 
-echo "Sanitizing links for environment..."
 find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
     -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0/|${BASE_PREFIX}${VERSION}/|g" \
     -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go/|${BASE_PREFIX}${VERSION}/|g" \
@@ -45,6 +42,15 @@ find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
     -e "s|href=\"/\"|href=\"${BASE_PREFIX}\"|g" \
     -e "s|http://localhost:8080/|${BASE_PREFIX}${VERSION}/|g" \
     {} +
+
+cat <<EOF > "$OUTPUT_DIR/$VERSION/collapsible.js"
+document.addEventListener('DOMContentLoaded', () => {
+  const directorySection = document.querySelector('.UnitDirectories');
+  if (!directorySection) return;
+  
+  const rows = Array.from(directorySection.querySelectorAll('tr'));
+});
+EOF
 
 mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go@v0.0.0.html" "$OUTPUT_DIR/$VERSION/index.html" || true
 
