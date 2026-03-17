@@ -41,16 +41,12 @@ find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
     -e "s|/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|https://github.com/googleapis/mcp-toolbox-sdk-go/tree/main/|g" \
     -e "s|href=\"/\"|href=\"${BASE_PREFIX}\"|g" \
     -e "s|http://localhost:8080/|${BASE_PREFIX}${VERSION}/|g" \
+    -e "s|?tab=source|#source|g" \
     {} +
 
-cat <<EOF > "$OUTPUT_DIR/$VERSION/collapsible.js"
-document.addEventListener('DOMContentLoaded', () => {
-  const directorySection = document.querySelector('.UnitDirectories');
-  if (!directorySection) return;
-  
-  const rows = Array.from(directorySection.querySelectorAll('tr'));
-});
-EOF
+find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
+    's|</body>|<script>document.querySelectorAll(".js-expandAll").forEach(btn => { btn.onclick = () => { document.querySelectorAll(".UnitDirectories-table tr").forEach(tr => tr.classList.toggle("is-hidden")); } });</script></body>|' \
+    {} +
 
 mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go@v0.0.0.html" "$OUTPUT_DIR/$VERSION/index.html" || true
 
