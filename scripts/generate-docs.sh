@@ -20,25 +20,25 @@ PKGSITE_PID=$!
 
 sleep 15
 
-# 4. Scrape the documentation
-# -nH: No Host (removes "localhost:8080" from path)
-# --cut-dirs=3: Flattens the "github.com/googleapis/mcp-toolbox-sdk-go" structure
 wget -nv --recursive --page-requisites --convert-links \
      --restrict-file-names=windows --no-parent \
      -nH --adjust-extension --cut-dirs=3 \
      --reject-regex '(\?|&)(tab=versions|tab=importedby)' \
      -P "$OUTPUT_DIR/$VERSION" \
-     http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go || true
+     "http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0" || true
 
-# 5. Cleanup
 kill $PKGSITE_PID
-rm go.work go.work.sum # Remove temporary workspace files
+rm go.work go.work.sum
 
-# 6. Rename the root file to index.html for GitHub Pages
-# Wget saves the module root as 'mcp-toolbox-sdk-go.html' after --cut-dirs
-mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go.html" "$OUTPUT_DIR/$VERSION/index.html" || true
+echo "Sanitizing links in generated HTML..."
+find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
+    -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0/||g" \
+    -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go/||g" \
+    -e "s|http://localhost:8080/|/|g" \
+    {} +
 
-# 7. Verification
+mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go@v0.0.0.html" "$OUTPUT_DIR/$VERSION/index.html" || true
+
 if [ -f "$OUTPUT_DIR/$VERSION/index.html" ]; then
   echo "Documentation generated successfully in $OUTPUT_DIR/$VERSION"
 else
