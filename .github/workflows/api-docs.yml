@@ -51,4 +51,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./deploy-root
           keep_files: true 
-          cname: go.mcp-toolbox.dev 
+          cname: ${{ github.repository == 'googleapis/mcp-toolbox-sdk-go' && 'go.mcp-toolbox.dev' || '' }}
+
