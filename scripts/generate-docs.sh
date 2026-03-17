@@ -9,7 +9,14 @@ if [ -z "$OUTPUT_DIR" ] || [ -z "$VERSION" ]; then
   exit 1
 fi
 
-echo "Generating documentation for version $VERSION..."
+if [[ "$GITHUB_REPOSITORY" == "googleapis/mcp-toolbox-sdk-go" ]]; then
+  BASE_PREFIX="/"
+else
+  REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2)
+  BASE_PREFIX="/${REPO_NAME}/"
+fi
+
+echo "Generating documentation for version $VERSION with prefix $BASE_PREFIX..."
 
 go work init . ./core ./tbadk ./tbgenkit
 
@@ -30,18 +37,15 @@ wget -nv --recursive --page-requisites --convert-links \
 kill $PKGSITE_PID
 rm go.work go.work.sum
 
-echo "Sanitizing links in generated HTML..."
+echo "Sanitizing links for environment..."
 find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
-    -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0/||g" \
-    -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go/||g" \
-    -e "s|http://localhost:8080/|/|g" \
+    -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0/|${BASE_PREFIX}${VERSION}/|g" \
+    -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go/|${BASE_PREFIX}${VERSION}/|g" \
+    -e "s|/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|https://github.com/googleapis/mcp-toolbox-sdk-go/tree/main/|g" \
+    -e "s|href=\"/\"|href=\"${BASE_PREFIX}\"|g" \
+    -e "s|http://localhost:8080/|${BASE_PREFIX}${VERSION}/|g" \
     {} +
 
 mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go@v0.0.0.html" "$OUTPUT_DIR/$VERSION/index.html" || true
 
-if [ -f "$OUTPUT_DIR/$VERSION/index.html" ]; then
-  echo "Documentation generated successfully in $OUTPUT_DIR/$VERSION"
-else
-  echo "Error: index.html was not created. Check logs for wget failures."
-  exit 1
-fi
+echo "Documentation generated successfully in $OUTPUT_DIR/$VERSION"

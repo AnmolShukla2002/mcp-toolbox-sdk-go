@@ -32,6 +32,8 @@ jobs:
           fi
 
       - name: Build Versioned Docs
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           chmod +x scripts/generate-docs.sh
           ./scripts/generate-docs.sh "deploy-root" "${{ steps.vars.outputs.version }}"
