@@ -35,39 +35,82 @@ wget -nv --recursive --page-requisites --convert-links \
 kill $PKGSITE_PID
 rm go.work go.work.sum
 
-GITHUB_BLOB="https://github.com/googleapis/mcp-toolbox-sdk-go/blob/main"
-
-VERSION_UI="<div class='v-selector'>Version: <select id='v-drop' onchange='window.location.href=\"${BASE_PREFIX}\"+this.value+\"/\"'></select></div>"
-
-CUSTOM_CSS="<style> \
-  .UnitDirectories-table tr.is-hidden { display: table-row !important; } \
-  .js-expandAll { display: none !important; } \
-  .v-selector { background: #375eab; color: white; padding: 10px; text-align: right; font-family: sans-serif; } \
-  #v-drop { margin-left: 10px; padding: 2px 5px; border-radius: 4px; } \
-</style>"
-
 find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
     -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0/|${BASE_PREFIX}${VERSION}/|g" \
     -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go/|${BASE_PREFIX}${VERSION}/|g" \
-    -e "s|/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|${GITHUB_BLOB}/|g" \
+    -e "s|/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|https://github.com/googleapis/mcp-toolbox-sdk-go/tree/main/|g" \
     -e "s|href=\"/\"|href=\"${BASE_PREFIX}\"|g" \
     -e "s|http://localhost:8080/|${BASE_PREFIX}${VERSION}/|g" \
-    -e "s|<header|<header>${VERSION_UI}|g" \
-    -e "s|</head>|${CUSTOM_CSS}</head>|g" \
+    -e "s|?tab=source|#source|g" \
     {} +
 
-DROPDOWN_BTN="<script> \
-  fetch('${BASE_PREFIX}versions.json').then(r => r.json()).then(vs => { \
-    const d = document.getElementById('v-drop'); \
-    vs.forEach(v => { const o = document.createElement('option'); o.value = v; o.text = v; if(window.location.pathname.includes(v)) o.selected = true; d.add(o); }); \
-  }); \
-  document.querySelectorAll('a[href*=\"?tab=source\"], a[href*=\"#source\"]').forEach(l => { \
-    const file = l.href.split('/').pop().split('?')[0].split('#')[0]; \
-    if(file.endsWith('.go')) { l.href = '${GITHUB_BLOB}/' + file; l.target = '_blank'; } \
-  }); \
-</script>"
+cat << EOF > inject-payload.html
+<style>
 
-find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i "s|</body>|${DROPDOWN_BTN}</body>|g" {} +
+  tr.is-hidden { display: table-row !important; }
+  button.js-expandAll, 
+  button.UnitDirectories-toggleButton,
+  .UnitDirectories-toggleButton { display: none !important; }
+  
+  #custom-version-selector { margin-left: 15px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    
+    fetch('${BASE_PREFIX}versions.json')
+      .then(res => res.json())
+      .then(versions => {
+        const header = document.querySelector('.js-headerMenu, .Header-menu') || document.body;
+        const select = document.createElement('select');
+        select.id = 'custom-version-selector';
+        
+        versions.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = v;
+
+          if (window.location.pathname.includes('/' + v + '/')) opt.selected = true;
+          select.appendChild(opt);
+        });
+        
+        select.addEventListener('change', (e) => {
+          const targetVersion = e.target.value;
+          const currentPath = window.location.pathname;
+          const newPath = currentPath.replace(/\/(v[^\/]+|dev-[^\/]+)\//, '/' + targetVersion + '/');
+          window.location.href = newPath;
+        });
+        
+        header.prepend(select);
+      }).catch(err => console.error('Failed to load version dropdown:', err));
+
+    document.querySelectorAll('a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && (href.includes('#source') || href.endsWith('.go'))) {
+        try {
+          const url = new URL(link.href, window.location.origin);
+          const pathParts = url.pathname.split('/');
+          
+          const versionIndex = pathParts.findIndex(p => p === '${VERSION}');
+          if (versionIndex !== -1) {
+            const repoPath = pathParts.slice(versionIndex + 1).join('/');
+            
+            link.href = 'https://github.com/googleapis/mcp-toolbox-sdk-go/blob/main/' + repoPath;
+            link.target = '_blank';
+          }
+        } catch(e) {
+          console.error("Failed to parse source link:", link.href);
+        }
+      }
+    });
+
+  });
+</script>
+</body>
+EOF
+
+INJECT_CONTENT=$(tr '\n' ' ' < inject-payload.html)
+find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i "s|</body>|${INJECT_CONTENT}|g" {} +
+rm inject-payload.html
 
 mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go@v0.0.0.html" "$OUTPUT_DIR/$VERSION/index.html" || true
 
