@@ -9,14 +9,18 @@ if [ -z "$OUTPUT_DIR" ] || [ -z "$VERSION" ]; then
   exit 1
 fi
 
-REPO_OWNER_NAME=${GITHUB_REPOSITORY:-"googleapis/mcp-toolbox-sdk-go"}
-REPO_NAME=$(basename "$REPO_OWNER_NAME")
+MODULE_PATH="googleapis/mcp-toolbox-sdk-go" 
+MODULE_NAME=$(basename "$MODULE_PATH")
+
+REPO_PATH=${GITHUB_REPOSITORY:-$MODULE_PATH}
+REPO_NAME=$(basename "$REPO_PATH")
+
 DEFAULT_BRANCH=${GITHUB_REF_NAME:-"main"}
 PORT=8080
 PKGSITE_VERSION="v0.0.0"
 WAIT_TIME=60
 
-if [[ "$REPO_OWNER_NAME" == "googleapis/mcp-toolbox-sdk-go" ]]; then
+if [[ "$REPO_PATH" == "googleapis/mcp-toolbox-sdk-go" ]]; then
   BASE_PREFIX="/"
 else
   BASE_PREFIX="/${REPO_NAME}/"
@@ -35,16 +39,16 @@ wget -nv --recursive --page-requisites --convert-links \
      -nH --adjust-extension --cut-dirs=3 \
      --reject-regex '(\?|&)(tab=versions|tab=importedby)' \
      -P "$OUTPUT_DIR/$VERSION" \
-     "http://localhost:${PORT}/github.com/${REPO_OWNER_NAME}@${PKGSITE_VERSION}" || true
+     "http://localhost:${PORT}/github.com/${MODULE_PATH}@${PKGSITE_VERSION}" || true
 
 kill $PKGSITE_PID
 rm -f go.work go.work.sum
 
 find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
-    -e "s|http://localhost:${PORT}/github.com/${REPO_OWNER_NAME}@${PKGSITE_VERSION}/|${BASE_PREFIX}${VERSION}/|g" \
-    -e "s|http://localhost:${PORT}/github.com/${REPO_OWNER_NAME}/|${BASE_PREFIX}${VERSION}/|g" \
-    -e "s|http://localhost:${PORT}/files/.*${REPO_OWNER_NAME}/|https://github.com/${REPO_OWNER_NAME}/blob/${DEFAULT_BRANCH}/|g" \
-    -e "s|/files/.*${REPO_OWNER_NAME}/|https://github.com/${REPO_OWNER_NAME}/blob/${DEFAULT_BRANCH}/|g" \
+    -e "s|http://localhost:${PORT}/github.com/${MODULE_PATH}@${PKGSITE_VERSION}/|${BASE_PREFIX}${VERSION}/|g" \
+    -e "s|http://localhost:${PORT}/github.com/${MODULE_PATH}/|${BASE_PREFIX}${VERSION}/|g" \
+    -e "s|http://localhost:${PORT}/files/.*${MODULE_PATH}/|https://github.com/${REPO_PATH}/blob/${DEFAULT_BRANCH}/|g" \
+    -e "s|/files/.*${MODULE_PATH}/|https://github.com/${REPO_PATH}/blob/${DEFAULT_BRANCH}/|g" \
     -e "s|http://localhost:${PORT}https://|https://|g" \
     -e "s|href=\"/\"|href=\"${BASE_PREFIX}\"|g" \
     -e "s|http://localhost:${PORT}/|${BASE_PREFIX}${VERSION}/|g" \
@@ -114,7 +118,8 @@ cat << EOF > inject-payload.html
 
       if (link.href.includes('#source') || link.href.endsWith('.go')) {
         try {
-          if (link.href.includes('github.com/${REPO_OWNER_NAME}')) {
+          if (link.href.includes('github.com/${MODULE_PATH}')) {
+            link.href = link.href.replace('github.com/${MODULE_PATH}', 'github.com/${REPO_PATH}');
             link.href = link.href.replace('/tree/main/', '/blob/${DEFAULT_BRANCH}/');
             link.href = link.href.replace('/tree/${DEFAULT_BRANCH}/', '/blob/${DEFAULT_BRANCH}/');
             link.target = '_blank';
@@ -127,7 +132,7 @@ cat << EOF > inject-payload.html
           const versionIndex = pathParts.findIndex(p => p === '${VERSION}');
           if (versionIndex !== -1) {
             const repoPath = pathParts.slice(versionIndex + 1).join('/');
-            link.href = 'https://github.com/${REPO_OWNER_NAME}/blob/${DEFAULT_BRANCH}/' + repoPath;
+            link.href = 'https://github.com/${REPO_PATH}/blob/${DEFAULT_BRANCH}/' + repoPath;
             link.target = '_blank';
           }
         } catch(e) {
@@ -144,6 +149,6 @@ export INJECT_CONTENT=$(cat inject-payload.html)
 find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec perl -0777 -pi -e 's|</body>|$ENV{INJECT_CONTENT}|g' {} +
 rm inject-payload.html
 
-mv "$OUTPUT_DIR/$VERSION/${REPO_NAME}@${PKGSITE_VERSION}.html" "$OUTPUT_DIR/$VERSION/index.html" || true
+mv "$OUTPUT_DIR/$VERSION/${MODULE_NAME}@${PKGSITE_VERSION}.html" "$OUTPUT_DIR/$VERSION/index.html" || true
 
 echo "Documentation generated successfully in $OUTPUT_DIR/$VERSION"
