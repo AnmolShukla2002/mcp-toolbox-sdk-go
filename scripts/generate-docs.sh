@@ -46,7 +46,6 @@ find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
 
 cat << EOF > inject-payload.html
 <style>
-
   tr.is-hidden { display: table-row !important; }
   button.js-expandAll, 
   button.UnitDirectories-toggleButton,
@@ -56,7 +55,6 @@ cat << EOF > inject-payload.html
 </style>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    
     fetch('${BASE_PREFIX}versions.json')
       .then(res => res.json())
       .then(versions => {
@@ -68,7 +66,6 @@ cat << EOF > inject-payload.html
           const opt = document.createElement('option');
           opt.value = v;
           opt.textContent = v;
-
           if (window.location.pathname.includes('/' + v + '/')) opt.selected = true;
           select.appendChild(opt);
         });
@@ -93,7 +90,6 @@ cat << EOF > inject-payload.html
           const versionIndex = pathParts.findIndex(p => p === '${VERSION}');
           if (versionIndex !== -1) {
             const repoPath = pathParts.slice(versionIndex + 1).join('/');
-            
             link.href = 'https://github.com/googleapis/mcp-toolbox-sdk-go/blob/main/' + repoPath;
             link.target = '_blank';
           }
@@ -102,14 +98,13 @@ cat << EOF > inject-payload.html
         }
       }
     });
-
   });
 </script>
 </body>
 EOF
 
-INJECT_CONTENT=$(tr '\n' ' ' < inject-payload.html)
-find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i "s|</body>|${INJECT_CONTENT}|g" {} +
+export INJECT_CONTENT=$(cat inject-payload.html)
+find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec perl -0777 -pi -e 's|</body>|$ENV{INJECT_CONTENT}|g' {} +
 rm inject-payload.html
 
 mv "$OUTPUT_DIR/$VERSION/mcp-toolbox-sdk-go@v0.0.0.html" "$OUTPUT_DIR/$VERSION/index.html" || true
