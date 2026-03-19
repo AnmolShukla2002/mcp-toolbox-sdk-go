@@ -108,6 +108,19 @@ cat << EOF > inject-payload.html
         }
       }).catch(err => console.error('Failed to load version dropdown:', err));
 
+    document.querySelectorAll('p, .Documentation-overview').forEach(el => {
+      if (el.innerHTML.includes('[!NOTE]')) {
+        el.innerHTML = el.innerHTML.replace('[!NOTE]', '<strong><svg style="width:16px;height:16px;vertical-align:text-bottom;margin-right:4px;" viewBox="0 0 16 16" fill="#0969da"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</strong><br>');
+        el.style.borderLeft = '4px solid #0969da';
+        el.style.padding = '10px 15px';
+        el.style.color = '#24292f';
+        el.style.backgroundColor = '#ddf4ff';
+        el.style.borderRadius = '6px';
+        el.style.marginTop = '15px';
+        el.style.marginBottom = '15px';
+      }
+    });
+
     document.querySelectorAll('a').forEach(link => {
       let href = link.getAttribute('href');
       if (!href) return;
