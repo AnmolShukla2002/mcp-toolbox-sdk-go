@@ -51,14 +51,22 @@ cat << EOF > inject-payload.html
   button.UnitDirectories-toggleButton,
   .UnitDirectories-toggleButton { display: none !important; }
   
-  #custom-version-selector { margin-left: 15px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+  #custom-version-selector { 
+    margin-left: 5px; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    border: 1px solid #ccc; 
+    font-size: 14px; 
+    background-color: #f8f9fa;
+    color: #202224;
+    cursor: pointer;
+  }
 </style>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     fetch('${BASE_PREFIX}versions.json')
       .then(res => res.json())
       .then(versions => {
-        const header = document.querySelector('.js-headerMenu, .Header-menu') || document.body;
         const select = document.createElement('select');
         select.id = 'custom-version-selector';
         
@@ -77,7 +85,16 @@ cat << EOF > inject-payload.html
           window.location.href = newPath;
         });
         
-        header.prepend(select);
+        const metaDetails = document.querySelectorAll('.UnitMeta-details a, .UnitMeta a');
+        const v0Link = Array.from(metaDetails).find(a => a.textContent.trim() === 'v0.0.0');
+        
+        if (v0Link) {
+          v0Link.style.display = 'none';
+          v0Link.parentNode.insertBefore(select, v0Link.nextSibling);
+        } else {
+          const header = document.querySelector('.js-headerMenu, .Header-menu') || document.body;
+          header.prepend(select);
+        }
       }).catch(err => console.error('Failed to load version dropdown:', err));
 
     document.querySelectorAll('a').forEach(link => {
