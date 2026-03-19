@@ -17,12 +17,10 @@ else
 fi
 
 go work init . ./core ./tbadk ./tbgenkit
-
 go install golang.org/x/pkgsite/cmd/pkgsite@latest
 
 pkgsite -http=:8080 &
 PKGSITE_PID=$!
-
 sleep 15
 
 wget -nv --recursive --page-requisites --convert-links \
@@ -33,12 +31,15 @@ wget -nv --recursive --page-requisites --convert-links \
      "http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0" || true
 
 kill $PKGSITE_PID
-rm go.work go.work.sum
+rm -f go.work go.work.sum
 
+# Added rules to catch localhost prefixes attached to runner paths to prevent URL mangling
 find "$OUTPUT_DIR/$VERSION" -type f -name "*.html" -exec sed -i \
     -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go@v0.0.0/|${BASE_PREFIX}${VERSION}/|g" \
     -e "s|http://localhost:8080/github.com/googleapis/mcp-toolbox-sdk-go/|${BASE_PREFIX}${VERSION}/|g" \
-    -e "s|/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|https://github.com/googleapis/mcp-toolbox-sdk-go/tree/main/|g" \
+    -e "s|http://localhost:8080/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|https://github.com/googleapis/mcp-toolbox-sdk-go/blob/main/|g" \
+    -e "s|/files/home/runner/work/mcp-toolbox-sdk-go/mcp-toolbox-sdk-go/github.com/googleapis/mcp-toolbox-sdk-go/|https://github.com/googleapis/mcp-toolbox-sdk-go/blob/main/|g" \
+    -e "s|http://localhost:8080https://|https://|g" \
     -e "s|href=\"/\"|href=\"${BASE_PREFIX}\"|g" \
     -e "s|http://localhost:8080/|${BASE_PREFIX}${VERSION}/|g" \
     -e "s|?tab=source|#source|g" \
@@ -98,9 +99,21 @@ cat << EOF > inject-payload.html
       }).catch(err => console.error('Failed to load version dropdown:', err));
 
     document.querySelectorAll('a').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href && (href.includes('#source') || href.endsWith('.go'))) {
+      let href = link.getAttribute('href');
+      if (!href) return;
+
+      if (link.href.includes('http://localhost:8080https://')) {
+        link.href = link.href.replace('http://localhost:8080https://', 'https://');
+      }
+
+      if (link.href.includes('#source') || link.href.endsWith('.go')) {
         try {
+          if (link.href.includes('github.com/googleapis/mcp-toolbox-sdk-go')) {
+            link.href = link.href.replace('/tree/main/', '/blob/main/');
+            link.target = '_blank';
+            return;
+          }
+
           const url = new URL(link.href, window.location.origin);
           const pathParts = url.pathname.split('/');
           
@@ -111,7 +124,7 @@ cat << EOF > inject-payload.html
             link.target = '_blank';
           }
         } catch(e) {
-          console.error("Failed to parse source link:", link.href);
+          console.error("Failed to parse source link:", link.href, e);
         }
       }
     });
