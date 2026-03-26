@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Packages on MCP Toolbox Go API</title><link>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/</link><description>Recent content in Packages on MCP Toolbox Go API</description><generator>Hugo</generator><language>en</language><atom:link href="https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Core</title><link>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/core/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/core/</guid><description>&lt;div style="margin-bottom: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; display: inline-block;"&gt;
  &lt;label for="core-version" style="font-weight: bold; margin-right: 10px; color: #4a4a4a;"&gt;Package Version:&lt;/label&gt;
- &lt;select id="core-version" onchange="if (this.value) window.location.href=this.value;" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; cursor: pointer;"&gt;
+ &lt;select id="core-version" onchange="if (this.value) window.location.href=this.value;" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; color: #333333; cursor: pointer;"&gt;
  &lt;option value="https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/core/"&gt;main (latest)&lt;/option&gt;
  &lt;/select&gt;
 &lt;/div&gt;
@@ -83,7 +83,7 @@
 &lt;/ul&gt;
 &lt;p&gt;&lt;a name="GetGoogleIDToken"&gt;&lt;/a&gt;&lt;/p&gt;</description></item><item><title>Tbadk</title><link>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/tbadk/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/tbadk/</guid><description>&lt;div style="margin-bottom: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; display: inline-block;"&gt;
  &lt;label for="tbadk-version" style="font-weight: bold; margin-right: 10px; color: #4a4a4a;"&gt;Package Version:&lt;/label&gt;
- &lt;select id="tbadk-version" onchange="if (this.value) window.location.href=this.value;" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; cursor: pointer;"&gt;
+ &lt;select id="tbadk-version" onchange="if (this.value) window.location.href=this.value;" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; color: #333333; cursor: pointer;"&gt;
  &lt;option value="https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/tbadk/"&gt;main (latest)&lt;/option&gt;
  &lt;/select&gt;
 &lt;/div&gt;
@@ -112,7 +112,7 @@
 &lt;h2 id="constants"&gt;Constants&lt;/h2&gt;
 &lt;p&gt;&lt;a name="Version"&gt;&lt;/a&gt;Version is the current version of the library. This is updated automatically by release-please.&lt;/p&gt;</description></item><item><title>Tbgenkit</title><link>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/tbgenkit/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/tbgenkit/</guid><description>&lt;div style="margin-bottom: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; display: inline-block;"&gt;
  &lt;label for="tbgenkit-version" style="font-weight: bold; margin-right: 10px; color: #4a4a4a;"&gt;Package Version:&lt;/label&gt;
- &lt;select id="tbgenkit-version" onchange="if (this.value) window.location.href=this.value;" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; cursor: pointer;"&gt;
+ &lt;select id="tbgenkit-version" onchange="if (this.value) window.location.href=this.value;" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; color: #333333; cursor: pointer;"&gt;
  &lt;option value="https://AnmolShukla2002.github.io/mcp-toolbox-sdk-go/main/docs/tbgenkit/"&gt;main (latest)&lt;/option&gt;
  &lt;/select&gt;
 &lt;/div&gt;
@@ -124,6 +124,4 @@
 &lt;li&gt;&lt;a href="#ToGenkitTool"&gt;func ToGenkitTool(tool *core.ToolboxTool, g *genkit.Genkit) (ai.Tool, error)&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="constants"&gt;Constants&lt;/h2&gt;
-&lt;p&gt;&lt;a name="Version"&gt;&lt;/a&gt;Version is the current version of the library. This is updated automatically by release-please.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-go" data-lang="go"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Version&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;0.7.0&amp;#34;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// x-release-please-version&lt;/span&gt;&lt;span class="w"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;a name="ToGenkitTool"&gt;&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;&lt;a name="Version"&gt;&lt;/a&gt;Version is the current version of the library. This is updated automatically by release-please.&lt;/p&gt;</description></item></channel></rss>
